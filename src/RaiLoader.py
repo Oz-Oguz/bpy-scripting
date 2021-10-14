@@ -10,7 +10,7 @@ class RaiLoader():
 
   def __init__(self, foldername, anim_filename="Anim.txt",
                collada_filename="initial.dae", gripper_name="gripper",
-               floor_name="plate"):
+               floor_name="plate", anim_filename_other=None):
 
     self.gripper_name = gripper_name
 
@@ -19,6 +19,8 @@ class RaiLoader():
 
     fname = os.path.abspath(os.path.join(foldername, collada_filename))
     self.anim = Anim(foldername + "/" + anim_filename)   # "/Anim.txt"
+    if anim_filename_other is not None:
+       self.anim_other = Anim(foldername + "/" + anim_filename_other)  # other plan
 
     c = bpy.ops.wm.collada_import(
         filepath=fname, import_units=True, auto_connect=False)
@@ -150,11 +152,14 @@ class RaiLoader():
                 p.co = (cPose[0], cPose[1], cPose[2], 1)
                 p.keyframe_insert(data_path="co")
 
-  def draw_plan(self, folder, plan_arrow_collada, plan=None, finger_pos_buffer=[0, 0, +0.5]):
+  def draw_plan(self, folder, plan_arrow_collada, plan=None, finger_pos_buffer=[0, 0, +0.5], other_plan=None):
     if plan is None:
       if self.anim.plan_path is None:
         return
-      plan = self.anim.plan_path
+      if other_plan is None:
+        plan = self.anim.plan_path
+      else:
+        plan = self.anim_other.plan_path
 
     dirname = os.path.dirname(os.path.realpath(__file__))
     sys.path.append(dirname)

@@ -21,7 +21,9 @@ time_start_script = time.process_time()
 Nsegments = 1 #display N segments. -1: display all segments
 NkeyframeSteps = 1  # use every n-th keyframe, interpolate inbetween
 
-renderAnimation = False
+draw_other_plan = True
+anim_filename_other = None
+renderAnimation = True
 renderImage = ~renderAnimation
 doZoom = False
 doZoomOut = False
@@ -39,16 +41,18 @@ cameraFocusPoint = Vector((0,0,0))
 print(len(sys.argv))
 
 if len(sys.argv) > 5:
-  _, _, _, _, _, _, folder, collada_filename, anim_filename, video_filename = sys.argv
+  _, _, _, _, _, _, folder, collada_filename, anim_filename, anim_filename_other, video_filename = sys.argv
 else:
   folder = "data/animations/all_robots/"
   collada_filename = "z.dae"  # oz: always use this (since the task is the same)
   anim_filename = "133_pcl_w_plan.txt"  # 116_pcl-noise_2_anim
+  anim_filename_other = "133_pcl_w_plan_2.txt"  # 
   video_filename = "test_vid"
   
 print(f"folder: {folder}")
 print(f"collada_filename: {collada_filename}")
 print(f"anim_filename: {anim_filename}")
+print(f"anim_filename_other: {anim_filename_other}")
 print(f"video_filename: {video_filename}")
 # filename = os.path.basename(os.path.dirname(folder))
 ########################################################
@@ -59,8 +63,9 @@ floor_name = "floor"
 plan_arrow_filename = "arrow.dae"
 
 rai = RaiLoader(folder, anim_filename, collada_filename,
-                gripper_name, floor_name)
+                gripper_name, floor_name, anim_filename_other=anim_filename_other)
 rai.draw_plan(folder, plan_arrow_filename)
+rai.draw_plan(folder, plan_arrow_filename, other_plan=draw_other_plan)  # other plan
 rai.generateKeyframesFromAnim(Nsegments, NkeyframeSteps)
 
 setBackgroundColor((.2,.2,.2))
@@ -104,7 +109,7 @@ if renderImage:
   render.LastFrameToPNG(os.path.join(folder, video_filename + ".png"))
 
 if renderAnimation:
-  render.ToMP4(os.path.join(folder, video_filename + ".mp4"))
+  render.ToMP4(os.path.join(folder, video_filename + ".mp4"), fps=12)
 
 elapsed_time = time.process_time() - time_start_script
 print("TIME for RENDERING: %f (in s), %f (in m), %f (in h)"%\
